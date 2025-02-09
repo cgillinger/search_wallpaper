@@ -1,0 +1,113 @@
+### **Projektbeskrivning – Skrivbordsbakgrund med Bing API eller Bing Search utan API**
+
+#### **Översikt**
+Detta projekt syftar till att hämta och sätta en ny skrivbordsbakgrund med bilder på **sällskapsfåglar** varje gång programmet körs. Tidigare användes Wikimedia Commons API, men nu implementeras **Bing Image Search API eller alternativt Bing Search utan API** för att hämta bilder. Programmet ska **respektera API-begränsningar** och logga API-anrop för att säkerställa att den kostnadsfria nivån aldrig överskrids.
+
+---
+
+### **Kravspecifikation**
+
+✅ **Skrivbordsbakgrunder från Bing API eller Bing Search**  
+- Vid varje körning av `.exe` hämtas en **ny bild** från **antingen Bing Image Search API eller genom att hämta bilder från Bing Search utan API**.
+- Endast **landskapsorienterade bilder** (bredd > höjd) får användas.
+- Endast bilder på **sällskapsfåglar** får användas:
+  - Papegojor (Parrots, Macaws, Cockatoos, Budgerigars, African Grey Parrots)
+  - Finkar (Finches, Canaries, Lovebirds)
+  - Undulater
+  - Andra fåglar som är vanliga som husdjur (men ej höns, ankor eller bruksfåglar)
+- Bilder får endast hämtas från API:et om de inte överskrider den dagliga API-gränsen.
+
+✅ **Alternativ metod – Hämta bilder från Bing utan API**  
+- Om användaren väljer att **inte använda API**, kan bilder istället hämtas genom att:
+  - **Simulera en användarsökning på Bing** och extrahera bild-URL:er.
+  - **Använda en web scraper** för att hämta den första relevanta bilden baserat på en sökfråga.
+  - **Filtrera resultat** för att endast inkludera landskapsbilder.
+- Metoden **måste** efterlikna en riktig användares beteende och endast köras manuellt en gång per dag.
+- Bing får **inte** belastas med stora mängder automatiserade förfrågningar.
+
+✅ **Hantera API-begränsningar**  
+- Programmet måste **logga API-anrop eller sökningar** för att hålla koll på hur många anrop som gjorts.
+- Om den dagliga API-gränsen är uppnådd, eller om Bing utan API-sökningen misslyckas, ska en **cachead bild** från tidigare körningar användas istället.
+
+✅ **Bildhantering**  
+- Bilder sparas lokalt i en **cache** för att kunna återanvändas vid behov.
+- Endast bilder med en minsta upplösning på **1920x1080** får användas.
+- **Bilder som har använts de senaste 50 gångerna får inte användas igen.**
+
+✅ **Manuell exekvering (ingen automatisering)**  
+- `.exe` får **endast köras manuellt av användaren**, inte via schemaläggning.
+- Bing API eller Bing Search får endast anropas när `.exe` startas av användaren.
+
+✅ **Felhantering och loggning**  
+- Alla API-anrop, sökningar och misslyckade försök loggas i `bing_wallpaper.log`.
+- Om en bild inte kan hämtas eller sättas som bakgrund ska detta skrivas till loggen.
+
+✅ **Fil- och mappstruktur**  
+Programmet behåller samma struktur som tidigare:
+
+```
+BingWallpaper/
+├── src/
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── bing_api.py     # API-anrop till Bing Image Search
+│   │   ├── bing_scraper.py # Alternativ metod för att hämta bilder utan API
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── logging_config.py # Loggning
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── wallpaper.py     # Hantering av nedladdning och bakgrundsinställning
+│   ├── __init__.py
+│   └── main.py              # Huvudprogrammet
+├── logs/
+│   ├── bing_wallpaper.log   # Loggfil för API-anrop och fel
+├── cache/
+│   ├── saved_images/        # Cache för tidigare bilder
+├── history.json             # Håller koll på de 50 senaste bilderna
+├── config.json              # Håller konfigurationsinställningar, inklusive API-nyckel
+└── README.md                # Dokumentation
+```
+
+---
+
+### **Teknisk implementation**
+
+✅ **`bing_api.py` – API-anrop till Bing**  
+- Funktion för att hämta en slumpmässig bild baserat på fördefinierade fågelkategorier.  
+- Returnerar endast bilder som **uppfyller alla krav (storlek, landskap, ej tidigare använd).**  
+
+✅ **`bing_scraper.py` – Alternativ metod för att hämta bilder utan API**  
+- Använder antingen en **web scraper** eller ett **manuellt Bing-sökkommando**.
+- Filtrerar sökresultat så att endast relevanta bilder hämtas.
+- Kontrollerar att bilden är i landskapsformat och att den inte använts nyligen.
+
+✅ **`wallpaper.py` – Hanterar bakgrundsändring**  
+- Laddar ner bilden och ser till att den sparas korrekt.  
+- Om en bild är stående, exkluderas den automatiskt.  
+- Om en bild inte kan laddas ner, används en cachead bild istället.  
+
+✅ **`main.py` – Huvudlogik**  
+- Kontrollerar API-begränsningar innan den hämtar en ny bild.  
+- Loggar alla API-anrop och sökningar för att säkerställa att vi inte överskrider dagliga gränsen.  
+- Hanterar fel om bilden inte kan laddas ner eller om API-anrop/sökning misslyckas.
+
+---
+
+### **Krav på skriptleverans**
+- Alla skript måste levereras i **kompletta versioner**, inte bara ändrade delar.
+- **Oförändrade delar av skripten ska också inkluderas**, för att säkerställa att inget saknas vid uppdateringar.
+- Koden måste vara **testad och verifierad** innan den levereras.
+- Varje uppdatering måste inkludera **tydliga kommentarer** om vad som har ändrats.
+
+---
+
+### **Sammanfattning**
+🔹 **Bing API används eller alternativt Bing Search utan API.**  
+🔹 **Endast landskapsbilder av sällskapsfåglar används.**  
+🔹 **API-anrop/sökningar loggas och begränsas för att undvika kostnader och missbruk.**  
+🔹 **Ingen automatisk schemaläggning – användaren kör `.exe` manuellt.**  
+🔹 **Skriptleverans sker enligt fastställda riktlinjer.**  
+
+🚀 **Denna uppdaterade version ger full flexibilitet mellan API och direkt sökning via Bing!**
+
